@@ -1,5 +1,9 @@
 from typing import Dict, List, Union, Callable
 import pandas as pd
+import random
+from datetime import datetime
+import re
+from dateutil import parser
 
 class RealEstateChatbot:
     def __init__(self, filter_properties_func: Callable[[Dict, pd.DataFrame], List[Dict]]):
@@ -10,6 +14,8 @@ class RealEstateChatbot:
         self.visit_availability = None
         self.house_price = None
         self.vist_date = None
+        self.stored_dates = None
+
 
     def compose_answer(self, intent: str, entities: Dict, property_df: pd.DataFrame) -> str:
         if intent == "Greetings":
@@ -64,7 +70,7 @@ class RealEstateChatbot:
             house_price = self.house_price
             down_payment = entities.get('down_payment')
             loan_term = entities.get('loan_term')
-
+            #return down_payment,loan_term
             if down_payment and loan_term:
                 down_payment = float(down_payment)
                 loan_term = int(loan_term)
@@ -75,20 +81,31 @@ class RealEstateChatbot:
              return ("To calculate your monthly mortgage payment, please provide the down payment amount and the loan term in years.")
 
         elif intent == "Visit_schedule":
-                if self.selected_option_number is not None and 1 <= self.selected_option_number <= len(self.matching_properties):
-                    property_details = self.matching_properties[self.selected_option_number - 1]
-                    visit_availability = property_details.get('Visit availability date time', 'No visit dates available')
-                    self.visit_availability = visit_availability
+                #if self.selected_option_number is not None and 1 <= self.selected_option_number <= len(self.matching_properties):
+                   # property_details = self.matching_properties[self.selected_option_number - 1]
+                   # visit_availability = property_details.get('Visit availability date time', 'No visit dates available')
+                available_dates = ["2024/08/10", "2024/08/11","2024/08/12","2024/08/13",
+                        "2024/08/14", "2024/08/15", "2024/08/16","2024/08/17", "2024/08/18",
+                          "2024/08/19", "2024/08/20",  "2024/08/21","2024/08/22","2024/08/23",
+                            "2024/08/24","2024/08/25", "2024/08/26", "2024/08/27","2024/08/28",
+                       "2024/08/29",  "2024/08/30"]
+                stored_dates = random.sample(available_dates, 3)  
+                self.stored_dates = stored_dates  
                 return (
                     "These are the available dates to view the property. "
                     "If you want to schedule the appointment for a visit, choose one date from below:\n"
-                    f"{visit_availability}"
+                    f"{self.stored_dates}"
                 )
         elif intent == "Visit_confirmed":
-                visit_dates = [date.strip() for date in self.visit_availability.split('\n')]
-                if entities.get('visit_date') in visit_dates:
-                    self.visit_date = entities.get('visit_date')
-                    return f"Okay, your visit appointment is confirmed for this house on {self.visit_date}."
+                #visit_dates = [date.strip() for date in self.visit_availability.split('\n')]
+                extracted_dates = entities.get('visit_date')
+                #return extracted_dates
+                parsed_date = parser.parse(extracted_dates)
+                formatted_date = parsed_date.strftime("%Y/%m/%d")
+                #return formatted_date
+                #return self.stored_dates
+                if formatted_date in self.stored_dates:
+                    return f"Okay, your visit appointment is confirmed for this house on {extracted_dates}."
                 else:
                     return "Sorry, the chosen date is not available. Please try again."
         
