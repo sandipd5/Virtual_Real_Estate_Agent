@@ -28,8 +28,8 @@ patterns = {
     'repairs_needed': r'\brepairs needed\b',
     'basement': r'\bbasement\b',
     'visit_availability': r'\bvisit availability\b',
-    'down_loan': r'\b\d{1,3}(?:,\d{3})?\b',
     'house_option': r'option\s*(\d+)',
+    'payment':r'\$(\d+).*?\b(\d+)\b(?=\s*years)'
     
 
     
@@ -96,17 +96,18 @@ def extract_entities(text):
             context = extract_context(text, match)
             if entity == 'nearby':
                 entities[entity].append(match.group(0)) 
-            if entity == 'down_loan':
-                number_pattern = r'\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?'
-                numbers = re.findall(number_pattern, text)
-                numbers = [int(num.replace(',', '')) for num in numbers]
-                entities['down_payment'] = max(numbers)
-                entities['loan_term'] = min(numbers)
+            if entity == 'payment':
+                downpayment = match.group(1)  # Captures 350000
+                loan_term = match.group(2)     # Captures 15
+                downpayment = float(downpayment)
+                loan_term = int(loan_term)
+                entities['down_payment'] = downpayment
+                entities['loan_term'] = loan_term
             #if entity == 'house_option':
             #    entities['option_number'] = int(match.group(1))
            # if entity == 'date_match':
             #    entities['visit_date'] = match.group(0)
-            #else:
+            else:
                 entities[entity] = match.group(0)
     
     
@@ -116,7 +117,7 @@ def extract_entities(text):
         entities['option_number'] = int(option_match.group(1))
     
     # Extract dates from visit dates
-    date_match = re.search(r'\d{4}\/\d{2}\/\d{2}', text)
+    date_match = re.search(r'(\d{4}[-/]\d{2}[-/]\d{2})', text)
     if date_match:
         entities['visit_date'] = date_match.group(0)
         
