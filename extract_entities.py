@@ -28,6 +28,13 @@ patterns = {
     'repairs_needed': r'\brepairs needed\b',
     'basement': r'\bbasement\b',
     'visit_availability': r'\bvisit availability\b',
+    'down_loan': r'\b\d{1,3}(?:,\d{3})?\b',
+    'house_option': r'option\s*(\d+)',
+    
+
+    
+
+     
 }
 
 # Function to extract context
@@ -67,7 +74,10 @@ def extract_entities(text):
         'basement': None,
         'visit_availability': None,
         'detailed_summary': None,
-        'option_number': None
+        'option_number': None,
+        'down_payment': None,
+        'loan_term': None,
+        'visit_date': None
     }
 
     # Extract entities using spaCy's NER
@@ -78,25 +88,37 @@ def extract_entities(text):
             entities['property_price'] = ent.text
         elif ent.label_ == "DATE" and re.search(r'\d{4}', ent.text):
             entities['year_built'] = ent.text
-
+    
     # Extract entities using custom regex patterns
     for entity, pattern in patterns.items():
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             context = extract_context(text, match)
             if entity == 'nearby':
-                entities[entity].append(match.group(0))
-            else:
+                entities[entity].append(match.group(0)) 
+            if entity == 'down_loan':
+                number_pattern = r'\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?'
+                numbers = re.findall(number_pattern, text)
+                numbers = [int(num.replace(',', '')) for num in numbers]
+                entities['down_payment'] = max(numbers)
+                entities['loan_term'] = min(numbers)
+            #if entity == 'house_option':
+            #    entities['option_number'] = int(match.group(1))
+           # if entity == 'date_match':
+            #    entities['visit_date'] = match.group(0)
+            #else:
                 entities[entity] = match.group(0)
+    
+    
     # Extract option number for details using custom regex patterns
     option_match = re.search(r'option\s*(\d+)', text, re.IGNORECASE)
     if option_match:
         entities['option_number'] = int(option_match.group(1))
-
+    
+    # Extract dates from visit dates
+    date_match = re.search(r'\d{4}\/\d{2}\/\d{2}', text)
+    if date_match:
+        entities['visit_date'] = date_match.group(0)
+        
     return entities
 
-# Test query
-test_query = ("I'm interested in option 2. Can I have more information?")
-
-entities = extract_entities(test_query)
-print(entities)

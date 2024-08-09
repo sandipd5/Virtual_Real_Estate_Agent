@@ -2,7 +2,9 @@ from flask import Flask, request, render_template,jsonify
 import joblib
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import load_model
 from extract_entities import extract_entities
 from filter_properties import filter_properties
 from answer_composition import RealEstateChatbot
@@ -11,42 +13,17 @@ from answer_composition import RealEstateChatbot
 app = Flask(__name__)
 
 # Load the trained model
-model = joblib.load('model/test_model_file.pkl')
+model = joblib.load('model/new/new_lstm_model.pkl')
+#model = load_model('model/new/lstm_model.h5')
 
 # Load tokenizer and label encoder
-tokenizer = joblib.load('model/tokenizer.pkl')
-le = joblib.load('model/label_encoder.pkl')
+tokenizer = joblib.load('model/new/new_lsmt_tokenizer.pkl')
+le = joblib.load('model/new/new_lstm_label_encoder.pkl')
 
 # Define the maximum sequence length
 max_sequence_length = 9  # Adjust according to your training
 
-# Create a DataFrame
-data = {
-    "Bedroom": [2, 3, 4,5,3,2, 3, 4, 2, 3],
-    "Bathroom": [1, 2, 3, 1, 2, 3, 1, 2, 3, 1],
-    "Price": [500000, 600000, 700000, 800000, 500000, 600000, 700000, 800000, 600000, 700000],
-    "City": ["Toronto", "Toronto", "Toronto", "Kitchener","Toronto", "Kitchener", "Kitchener", "Toronto", "Kitchener","Kitchener"],
-    "House Type": ["Condo", "House", "Apartment", "Townhouse", "Condo", "House", "Apartment", "Townhouse", "House", "Condo"],
-    "House Size": ["150 sqft", "250 sqft", "350 sqft", "450 sqft", "150 sqft", "250 sqft", "350 sqft", "450 sqft", "250 sqft", "350 sqft"],
-    "Water": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Electricity": ["Yes", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "Yes", "No"],
-    "Financing": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Nearby": ["Hospital, School", "School, Grocery", "Grocery, Public Transport", "Public Transport, Recreational Park", "Hospital, School", "School, Grocery", "Grocery, Public Transport", "Public Transport, Recreational Park", "Hospital, School", "School, Grocery"],
-    "Status": ["Available", "Sold", "Available", "Sold", "Available", "Sold", "Available", "Sold", "Available", "Sold"],
-    "Swimming Pool": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Recent renovation/upgrades": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Year built": [2010, 2012, 2014, 2016, 2010, 2012, 2014, 2016, 2012, 2014],
-    "Move-in-ready": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Heating": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Cooling": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Parking": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Repairs needed?": ["No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes"],
-    "Basement": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"],
-    "Visit availability date time": ["2024/12/10", "2024/12/11", "2024/12/12", "2024/12/13", "2024/12/10", "2024/12/11", "2024/12/12", "2024/12/13", "2024/12/11", "2024/12/12"],
-    "Detailed/ summary of property": ["Spacious condo in downtown Toronto", "Beautiful house with a large backyard", "Modern apartment with city views", "Townhouse in a quiet neighborhood", "Cozy condo in Kitchener", "Large house with a garden", "Apartment near public transport", "Townhouse close to amenities", "House with modern finishes", "Condo with upgraded features"]
-}
-
-property_df = pd.DataFrame(data)
+property_df = pd.read_csv('database/new_realtor_dataset.csv')
 
 
 
