@@ -2,6 +2,12 @@ from typing import Optional, Dict, List
 import pandas as pd
 import re
 
+
+#col_names = [House Type	Parking	Status	Move-in-ready	Swimming Pool	Heating	Cooling
+ #     Repairs needed?	Basement	Water	Electricity	Financing	Year built	
+ #     Visit availability date time	primary contact	inhouse amenities	Nearby	
+ #     province  City	address	Bathroom	Bedroom	Price	House Size]
+
 def extract_number(value: Optional[str]) -> Optional[int]:
     if isinstance(value, str):
         numbers = re.findall(r'\d+', value)
