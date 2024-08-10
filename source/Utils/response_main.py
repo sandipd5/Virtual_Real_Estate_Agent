@@ -41,15 +41,26 @@ def predict(prompt):
     predicted_intent_array = np.array([predicted_intent])
     predicted_intent_label = le.inverse_transform(predicted_intent_array)[0]
 
-    if predicted_intent_label=='google_search': 
+    if predicted_intent_label=='google_search' : 
         response=fine_tuned_resp(user_input)
         return response
+        
+        
+    try:
+        # Extract entities from the user input
+        entities = extract_entities(user_input)
 
-    # # Extract entities from the user input
-    entities = extract_entities(user_input)
- 
-    # #Generate a response based on the predicted intent and extracted entities
-    response = chatbot.compose_answer(predicted_intent_label, entities, property_df)
+        # Generate a response based on the predicted intent and extracted entities
+        response = chatbot.compose_answer(predicted_intent_label, entities, property_df)
+
+    except Exception as e:
+        # If an exception occurs, try using the fine-tuned model
+        response = fine_tuned_resp(user_input)
+        if len(response)<2:
+            response= "I'm unable to answer this at the momemt."
+
+   
+
 
     # Return the prediction to the user
     #return render_template('index.html', prediction=predicted_intent_label,response = response)

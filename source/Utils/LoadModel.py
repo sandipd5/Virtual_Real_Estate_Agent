@@ -12,7 +12,7 @@ from transformers import (
 )
 
 
-model_name = "jyotsna2411/real-estate-chatbot" #path/to/your/model/or/name/on/hub
+model_name = "jyotsna2411/real-estate-new" #path/to/your/model/or/name/on/hub
 
 modelfinetuned = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
 tokenizerfinetuned = AutoTokenizer.from_pretrained(model_name)
