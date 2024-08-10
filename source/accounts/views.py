@@ -83,17 +83,23 @@ class LogInView(FormView):
 
         form_class = self.get_form_class()
         form = form_class()
-        return render(request, self.template_name, {'form': form, 'user_type': user_type})
+        # return render(request, self.template_name, {'form': form, 'user_type': user_type})
+        return self.render_to_response(self.get_context_data(form=form, user_type=user_type))
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
+
+            # username = form.cleaned_data.get('username')
+            # password = form.cleaned_data.get('password')
+            user = authenticate(
+                request,
+                username=form.cleaned_data.get('username'),
+                password=form.cleaned_data.get('password')
+            )
             if user is not None:
                 login(request, user)
-                user_type = getattr(user, 'user_type', None)
+                user_type = request.GET.get('user_type')
                 
                 if user_type == 'customer':
                     return redirect('customer_login')
@@ -102,7 +108,9 @@ class LogInView(FormView):
                 else:
                     return HttpResponseBadRequest("Invalid user type")
             else:
-                return HttpResponse("Username or password incorrect.")
+                # return HttpResponse("Username or password incorrect.")
+                messages.error(request, "Username or password is incorrect.")
+                return self.form_invalid(form)
         else:
             return self.form_invalid(form)
 
@@ -114,16 +122,13 @@ class LogInView(FormView):
             request.session.delete_test_cookie()
 
         # Handle remember me
-        if settings.USE_REMEMBER_ME:
-            if not form.cleaned_data.get('remember_me', False):
-                request.session.set_expiry(0)
+        if settings.USE_REMEMBER_ME and not form.cleaned_data.get('remember_me', False):
+            request.session.set_expiry(0)
 
         login(request, form.user_cache)
 
         redirect_to = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME))
-        url_is_safe = is_safe_url(redirect_to, allowed_hosts=request.get_host(), require_https=request.is_secure())
-
-        if url_is_safe:
+        if redirect_to and is_safe_url(redirect_to, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
             return redirect(redirect_to)
 
         return redirect(settings.LOGIN_REDIRECT_URL)
@@ -131,8 +136,6 @@ class LogInView(FormView):
     def form_invalid(self, form):
         user_type = self.request.GET.get('user_type') or self.request.POST.get('user_type')
         return self.render_to_response(self.get_context_data(form=form, user_type=user_type))
-
-
 class SignUpView(GuestOnlyView, FormView):
     template_name = 'accounts/sign_up.html'
     form_class = SignUpForm

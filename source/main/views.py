@@ -123,45 +123,44 @@ def user_signup(request):
 #         return render(request, 'accounts/log_in.html', {'fname': fname, 'user_type': user_type})
 
 def user_login(request):
-    user_type = request.GET.get('user_type') or request.POST.get('user_type')
-    print(user_type)
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                auth_login(request, user)
-                user_type = getattr(user, 'user_type', None)  # Get user_type from user profile
+    print('Testttttt')
+    # user_type = request.GET.get('user_type') or request.POST.get('user_type')
+    # print(user_type)
+    # if request.method == 'POST':
+    #     form = AuthenticationForm(request, data=request.POST)
+    #     if form.is_valid():
+    #         username = form.cleaned_data.get('username')
+    #         password = form.cleaned_data.get('password')
+    #         # user = authenticate(request, username=username, password=password)
+    #         if (username is not None) and (password is not None):
                 
-                if user_type == 'customer':
-                    return redirect('customer_login')
-                elif user_type == 'realtor':
-                    return redirect('realtor_login')
-                else:
-                    return HttpResponseBadRequest("Invalid user type")
-            else:
-                return HttpResponse("Username or password incorrect.")
-        else:
-            # Handle form errors if needed
-            user_type = request.GET.get('user_type') or request.POST.get('user_type')
-            print(user_type)
-            return render(request, 'accounts/log_in.html', {'form': form, 'user_type': user_type})
+    #             if username == 'customer':
+    #                 return redirect('customer_login')
+    #             elif username == 'realtor':
+    #                 return redirect('realtor_login')
+    #             else:
+    #                 return HttpResponseBadRequest("Invalid user type")
+    #         else:
+    #             return HttpResponse("Username or password incorrect.")
+    #     else:
+    #         # Handle form errors if needed
+    #         user_type = request.GET.get('user_type') or request.POST.get('user_type')
+    #         print(user_type)
+    #         return render(request, 'accounts/log_in.html', {'form': form, 'user_type': user_type})
             
 
-    else:  # GET request handling
-        form = AuthenticationForm()
-        user_type = request.GET.get('user_type') or request.POST.get('user_type')
-        login_form = LoginForm()  # Your custom login form instance
+    # else:  # GET request handling
+    #     form = AuthenticationForm()
+    #     user_type = request.GET.get('user_type') or request.POST.get('user_type')
+    #     login_form = LoginForm()  # Your custom login form instance
 
-        return render(request, 'accounts/log_in.html', {'form': login_form, 'user_type': user_type})
-
-
+    #     return render(request, 'accounts/log_in.html', {'form': login_form, 'user_type': user_type})
 
 
 
-@login_required(login_url='login/realtor/')
+
+
+#@login_required(login_url='login/realtor/')
 #changes begin 
 def realtor(request):
     is_realtor = False
@@ -180,18 +179,19 @@ def user_logout(request):
     # messages.success(request, "Logged out successfully!")
     return redirect('login')
 
-@login_required(login_url='login/realtor/')
+#@login_required(login_url='login/realtor/')
 #changes begin 
 def realtor_login(request):
-    is_realtor = False
-    if request.user.is_authenticated: 
-        is_realtor = request.user.groups.filter(name = "Realtors").exists()
-    return render(request, 'main/realtor_login.html', {'is_realtor' : is_realtor})
+    print('realtor login')
+    # is_realtor = False
+    # if request.user.is_authenticated: 
+    #     is_realtor = request.user.groups.filter(name = "Realtors").exists()
+    #return redirect('realtor_login')
 #updating display of the home page 
 
 
 #for customer 
-@login_required(login_url='login/customer/')
+#@login_required(login_url='login/customer/')
 #changes begin 
 def customer(request):
     is_customer = False
@@ -199,7 +199,7 @@ def customer(request):
         is_customer = request.user.groups.filter(name = "Customers").exists()
     return render(request, 'main/customer.html', {'is_customer' : is_customer})
 
-@login_required(login_url='login/customer/')
+# @login_required(login_url='login/customer/')
 #changes begin 
 def customer_login(request):
     is_customer = False
