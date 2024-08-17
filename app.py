@@ -52,14 +52,15 @@ def predict():
     # Decode the predicted intent
     predicted_intent_array = np.array([predicted_intent])
     predicted_intent_label = le.inverse_transform(predicted_intent_array)[0]
-    print(predicted_intent_label,'predicted_intent_label')
-    response=fine_tuned_resp(user_input)
+
+    if predicted_intent_label=='google_search': 
+        response=fine_tuned_resp(user_input)
     
     # # Extract entities from the user input
-    # entities = extract_entities(user_input)
+    entities = extract_entities(user_input)
  
     # #Generate a response based on the predicted intent and extracted entities
-    # response = chatbot.compose_answer(predicted_intent_label, entities, property_df)
+    response = chatbot.compose_answer(predicted_intent_label, entities, property_df)
 
     # Return the prediction to the user
     #return render_template('index.html', prediction=predicted_intent_label,response = response)
