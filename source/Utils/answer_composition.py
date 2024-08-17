@@ -4,6 +4,13 @@ import random
 from datetime import datetime
 import re
 from dateutil import parser
+from django.contrib import messages
+from django.contrib import messages
+
+
+
+# realtor_notification_message="A visit is scheduled for MLS 00015 on {final_viewing_date}" if final_viewing_date else None
+final_viewing_date=None
 
 class RealEstateChatbot:
     def __init__(self, filter_properties_func: Callable[[Dict, pd.DataFrame], List[Dict]]):
@@ -105,7 +112,10 @@ class RealEstateChatbot:
                 #return formatted_date
                 #return self.stored_dates
                 if formatted_date in self.stored_dates:
+                    global final_viewing_date
+                    final_viewing_date=extracted_dates
                     return f"Okay, your visit appointment is confirmed for this house on {extracted_dates}."
+                    
                 else:
                     return "Sorry, the chosen date is not available. Please try again."
         

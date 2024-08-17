@@ -40,6 +40,9 @@ urlpatterns = [
     #path('main/', include('main.urls')),  #Add if needed
     path('get/', views.get_response, name='get_response'),
 
+    # path('realtor_login/', views.realtor_notification, name='realtor_login'),
+
+
 ]
 
 
