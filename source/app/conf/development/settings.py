@@ -11,7 +11,11 @@ CONTENT_DIR = join(BASE_DIR, 'content')
 SECRET_KEY = 'NhfTvayqggTBPswCXXhWaN69HuglgZIkM'
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'fd9c-34-68-13-238.ngrok-free.app', 'https://*.ngrok-free.app','9aa5-34-68-13-238.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = [
+    'https://fd9c-34-68-13-238.ngrok-free.app',
+    'https://*.ngrok-free.app',
+]
 
 SITE_ID = 1
 

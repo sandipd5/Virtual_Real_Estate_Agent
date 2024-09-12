@@ -8,13 +8,15 @@ from .models import UserProfile
 #changes here down
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_protect, get_token,csrf_exempt
+from django.views.decorators.csrf import csrf_protect, get_token
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
+from django.views.decorators.csrf import csrf_protect, get_token,csrf_exempt
+import sys
+sys.path.append("..")
 from Utils.response_main import predict
-from django.shortcuts import render
-from Utils.answer_composition import final_viewing_date
+
 
 # import logging
 
@@ -26,13 +28,13 @@ from Utils.answer_composition import final_viewing_date
 class IndexPageView(TemplateView):
     template_name = 'main/home1.html'
 
-@csrf_exempt
+@csrf_protect
 def page_view(request):
     return render(request, 'layouts/default/page.html')
 
 class ChangeLanguageView(TemplateView):
     template_name = 'main/change_language.html'
-
+@login_required(login_url='login')
 #signup
 def user_signup(request):
     if request.method == "POST":
@@ -121,45 +123,44 @@ def user_signup(request):
 #         return render(request, 'accounts/log_in.html', {'fname': fname, 'user_type': user_type})
 
 def user_login(request):
-    user_type = request.GET.get('user_type') or request.POST.get('user_type')
-    print(user_type)
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                auth_login(request, user)
-                user_type = getattr(user, 'user_type', None)  # Get user_type from user profile
+    print('Testttttt')
+    # user_type = request.GET.get('user_type') or request.POST.get('user_type')
+    # print(user_type)
+    # if request.method == 'POST':
+    #     form = AuthenticationForm(request, data=request.POST)
+    #     if form.is_valid():
+    #         username = form.cleaned_data.get('username')
+    #         password = form.cleaned_data.get('password')
+    #         # user = authenticate(request, username=username, password=password)
+    #         if (username is not None) and (password is not None):
                 
-                if user_type == 'customer':
-                    return redirect('customer_login')
-                elif user_type == 'realtor':
-                    return redirect('realtor_login')
-                else:
-                    return HttpResponseBadRequest("Invalid user type")
-            else:
-                return HttpResponse("Username or password incorrect.")
-        else:
-            # Handle form errors if needed
-            user_type = request.GET.get('user_type') or request.POST.get('user_type')
-            print(user_type)
-            return render(request, 'accounts/log_in.html', {'form': form, 'user_type': user_type})
+    #             if username == 'customer':
+    #                 return redirect('customer_login')
+    #             elif username == 'realtor':
+    #                 return redirect('realtor_login')
+    #             else:
+    #                 return HttpResponseBadRequest("Invalid user type")
+    #         else:
+    #             return HttpResponse("Username or password incorrect.")
+    #     else:
+    #         # Handle form errors if needed
+    #         user_type = request.GET.get('user_type') or request.POST.get('user_type')
+    #         print(user_type)
+    #         return render(request, 'accounts/log_in.html', {'form': form, 'user_type': user_type})
             
 
-    else:  # GET request handling
-        form = AuthenticationForm()
-        user_type = request.GET.get('user_type') or request.POST.get('user_type')
-        login_form = LoginForm()  # Your custom login form instance
+    # else:  # GET request handling
+    #     form = AuthenticationForm()
+    #     user_type = request.GET.get('user_type') or request.POST.get('user_type')
+    #     login_form = LoginForm()  # Your custom login form instance
 
-        return render(request, 'accounts/log_in.html', {'form': login_form, 'user_type': user_type})
-
-
+    #     return render(request, 'accounts/log_in.html', {'form': login_form, 'user_type': user_type})
 
 
 
-@login_required(login_url='login/realtor/')
+
+
+#@login_required(login_url='login/realtor/')
 #changes begin 
 def realtor(request):
     is_realtor = False
@@ -178,30 +179,19 @@ def user_logout(request):
     # messages.success(request, "Logged out successfully!")
     return redirect('login')
 
-@login_required(login_url='login/realtor/')
+#@login_required(login_url='login/realtor/')
 #changes begin 
 def realtor_login(request):
-    is_realtor = False
-    if request.user.is_authenticated: 
-        is_realtor = request.user.groups.filter(name = "Realtors").exists()
-   
-    view_msg= f"A visit is scheduled for MLS 00015 on {final_viewing_date}" if final_viewing_date else "You have no bookings yet"    
-    messages.info(request,view_msg)    
-
-    # # Set the message based on the data
-    # realtor_notification_message = (
-        
-    # )
-    # context = {
-    #     'is_realtor': is_realtor,
-    #     'realtor_notification_message': realtor_notification_message,
-    # }    
-    return render(request, 'main/realtor_login.html', {'is_realtor': is_realtor})
+    print('realtor login')
+    # is_realtor = False
+    # if request.user.is_authenticated: 
+    #     is_realtor = request.user.groups.filter(name = "Realtors").exists()
+    #return redirect('realtor_login')
 #updating display of the home page 
 
 
 #for customer 
-@login_required(login_url='login/customer/')
+#@login_required(login_url='login/customer/')
 #changes begin 
 def customer(request):
     is_customer = False
@@ -209,7 +199,7 @@ def customer(request):
         is_customer = request.user.groups.filter(name = "Customers").exists()
     return render(request, 'main/customer.html', {'is_customer' : is_customer})
 
-@login_required(login_url='login/customer/')
+# @login_required(login_url='login/customer/')
 #changes begin 
 def customer_login(request):
     is_customer = False
@@ -233,23 +223,6 @@ def get_response(request):
     if request.method == 'POST':
         user_message = request.POST.get('msg')
         # Here you can implement your logic to generate a response
-        response_message = predict(user_message)       
+        response_message = predict(user_message)
+        print(response_message)
         return JsonResponse(response_message, safe=False)
-    
-
-
-
-# def realtor_notification(request):
-#     final_viewing_date = ...  # Replace with your logic
-
-#     # Set the message based on the data
-#     realtor_notification_message = (
-#         f"A visit is scheduled for MLS 00015 on {final_viewing_date}"
-#         if final_viewing_date else None
-#     )
-
-#     context = {
-#         'realtor_notification_message': realtor_notification_message,
-#     }
-
-#     return render(request, 'realtor_login.html', context)

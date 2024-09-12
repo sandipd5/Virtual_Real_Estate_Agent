@@ -15,7 +15,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect,csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View, FormView
 from django.conf import settings
@@ -27,7 +27,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect
+
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic.edit import FormView
 
@@ -136,10 +136,13 @@ class LogInView(FormView):
     def form_invalid(self, form):
         user_type = self.request.GET.get('user_type') or self.request.POST.get('user_type')
         return self.render_to_response(self.get_context_data(form=form, user_type=user_type))
+    
 class SignUpView(GuestOnlyView, FormView):
     template_name = 'accounts/sign_up.html'
     form_class = SignUpForm
 
+
+    @csrf_exempt
     def form_valid(self, form):
         request = self.request
         user = form.save(commit=False)
